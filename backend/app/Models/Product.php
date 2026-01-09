@@ -7,4 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     //
+     protected $fillable = [
+        'sku',
+        'name',
+        'category',
+        'price_default',
+        'is_active',
+    ];
+
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(SalesOrderItem::class);
+    }
 }
