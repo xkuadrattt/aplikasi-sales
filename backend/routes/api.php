@@ -6,8 +6,12 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ReportController;
 
 Route::prefix('products')->group(function () {
-    Route::get('/', [ProductController::class, 'index']);
-    Route::post('/', [ProductController::class, 'store']);
+    Route::get('/', [ProductController::class, 'index']);          // LIST
+    Route::post('/', [ProductController::class, 'store']);         // CREATE
+    Route::get('{product}', [ProductController::class, 'show']);   // SHOW
+    Route::put('{product}', [ProductController::class, 'update']); // UPDATE (full)
+    Route::patch('{product}', [ProductController::class, 'update']);// UPDATE (partial)
+    Route::delete('{product}', [ProductController::class, 'destroy']); // DELETE
 });
 
 Route::prefix('orders')->group(function () {
