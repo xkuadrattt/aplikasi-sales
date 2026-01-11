@@ -8,30 +8,51 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index(Request $request)
-    {
-        $q = $request->query('q');
-        $active = $request->query('active');
-        $perPage = (int) $request->query('per_page', 10);
-        $perPage = max(1, min($perPage, 100)); // batas aman
+   public function index(Request $request)
+{
+    $q = trim((string) $request->query('q', ''));
 
-        $query = Product::query()->orderBy('name');
+    // filter: active=1/0/true/false (kalau tidak ada, tidak difilter)
+    $activeParam = $request->query('active', null);
 
-    if ($q) {
+    // pagination
+    $perPage = (int) $request->query('per_page', 10);
+    $perPage = max(1, min($perPage, 100)); // batas aman
+    $page = (int) $request->query('page', 1);
+    $page = max(1, $page);
+
+    // sorting
+    $sort = (string) $request->query('sort', 'name');
+    $dir = strtolower((string) $request->query('dir', 'asc')) === 'desc' ? 'desc' : 'asc';
+
+    $allowedSorts = ['name', 'sku', 'price_default', 'is_active', 'created_at', 'updated_at'];
+    if (!in_array($sort, $allowedSorts, true)) {
+        $sort = 'name';
+    }
+
+    $query = Product::query();
+
+    // search (sku/name)
+    if ($q !== '') {
         $query->where(function ($w) use ($q) {
             $w->where('name', 'like', "%{$q}%")
               ->orWhere('sku', 'like', "%{$q}%");
         });
     }
 
-    if ($active !== null) {
-        $query->where('is_active', filter_var($active, FILTER_VALIDATE_BOOLEAN));
+    // filter active
+    if ($activeParam !== null) {
+        $query->where('is_active', filter_var($activeParam, FILTER_VALIDATE_BOOLEAN));
     }
 
-        $data = $query->paginate($perPage);
+    $query->orderBy($sort, $dir);
 
-         return response()->json($data);
-    }
+    // paginate (paksa page biar konsisten)
+    $paginator = $query->paginate($perPage, ['*'], 'page', $page);
+
+    return response()->json($paginator);
+}
+
 
     public function store(Request $request)
     {
