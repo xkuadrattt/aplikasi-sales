@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
